@@ -1,6 +1,10 @@
 # Portugol VisualG 3.0 Web • Aplicativo de Estudo Interativo
 
-Um aplicativo completo, moderno e interativo para o estudo da lógica de programação utilizando a sintaxe oficial do **VisualG 3.0** (Portugol clássico).
+[![Deploy with Vercel](https://vercel.com/button)](https://portugol-nine.vercel.app)
+[![Vercel Live](https://img.shields.io/badge/Vercel-Online-success?logo=vercel)](https://portugol-nine.vercel.app)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/iMay-bug/Portugol)
+
+🌐 **Acesse a versão ao vivo:** [https://portugol-nine.vercel.app](https://portugol-nine.vercel.app)
 
 ---
 
