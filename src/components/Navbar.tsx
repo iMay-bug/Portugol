@@ -100,8 +100,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                        ? 'bg-blue-600 text-white shadow-sm dark:bg-slate-800 dark:text-white dark:border dark:border-slate-700/80'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`}
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-400'}`} />

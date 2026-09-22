@@ -101,8 +101,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
           onClick={() => setViewMode('kata')}
           className={`lg:col-span-6 rounded-2xl p-6 border transition-all cursor-pointer shadow-sm relative overflow-hidden flex flex-col justify-between ${
             viewMode === 'kata'
-              ? 'bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-900 border-blue-500 text-white shadow-blue-900/20 shadow-lg'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-500/60'
+              ? 'bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-900 border-slate-700 text-white shadow-lg'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-700'
           }`}
         >
           <div>
@@ -306,7 +306,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
                   className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition ${
                     isBeta
                       ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white'
-                      : 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 group-hover:bg-blue-600 group-hover:text-white'
                   }`}
                 >
                   <span>{isBeta ? 'Resolver Passo' : 'Treinar Kata'}</span>

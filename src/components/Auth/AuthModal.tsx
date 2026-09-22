@@ -440,7 +440,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {tab === 'accounts' && (
             <div className="space-y-4">
               {/* Current User Card */}
-              <div className="p-4 rounded-xl border border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/30 flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="text-3xl">{currentUser.avatar || '🧙‍♂️'}</div>
                   <div>

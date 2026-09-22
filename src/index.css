@@ -2,10 +2,34 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Custom scrollbars */
+/* Antigravity IDE Graphite / Charcoal Dark Theme */
+@theme {
+  /* Replace slate with pure neutral charcoal/zinc shades (zero blue hue) */
+  --color-slate-50: #fafafa;
+  --color-slate-100: #f4f4f5;
+  --color-slate-200: #e4e4e7;
+  --color-slate-300: #d4d4d8;
+  --color-slate-400: #a1a1aa;
+  --color-slate-500: #71717a;
+  --color-slate-600: #52525b;
+  --color-slate-700: #333336;
+  --color-slate-750: #29292c;
+  --color-slate-800: #202023;
+  --color-slate-850: #19191b;
+  --color-slate-900: #141416;
+  --color-slate-950: #0d0d0f;
+}
+
+/* Antigravity Dark Canvas Defaults */
+.dark body {
+  background-color: #0d0d0f;
+  color: #f4f4f5;
+}
+
+/* Custom scrollbars - Antigravity IDE neutral style */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -13,12 +37,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(120, 120, 128, 0.28);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
+  background: rgba(160, 160, 170, 0.5);
 }
 
 /* Code editor typography */
