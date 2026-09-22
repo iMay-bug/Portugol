@@ -12,6 +12,7 @@ import { VariableInfo } from './engine/types';
 import { EXERCISES, Exercise } from './data/exercises';
 import { api, DbStats, UserProfile } from './services/api';
 import { SavedAlgorithmsModal } from './components/Database/SavedAlgorithmsModal';
+import { Code2, Terminal, Database } from 'lucide-react';
 
 const DEFAULT_CODE = `algoritmo "CalculoMedia"
 // Disciplina  : Lógica de Programação
@@ -87,6 +88,7 @@ export function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isSavedModalOpen, setIsSavedModalOpen] = useState<boolean>(false);
   const [savedModalView, setSavedModalView] = useState<'list' | 'save'>('list');
+  const [playgroundMobileTab, setPlaygroundMobileTab] = useState<'editor' | 'console' | 'memory'>('editor');
 
   // Check SQLite health & user profile
   useEffect(() => {
@@ -150,6 +152,9 @@ export function App() {
       `[SISTEMA] Ambiente: VisualG 3.0 Web Interpreter`
     ]);
     setIsRunning(true);
+    if (window.innerWidth < 1024) {
+      setPlaygroundMobileTab('console');
+    }
 
     const startTime = performance.now();
 
@@ -279,14 +284,66 @@ export function App() {
         userKyu={userProfile?.kyu || 8}
       />
 
-      {/* Main App Content Body */}
-      <main className="flex-1 flex flex-col">
+      {/* Main App Content Body - with pb-20 on mobile for bottom dock clearance */}
+      <main className="flex-1 flex flex-col pb-20 md:pb-6">
         {/* TAB 1: PLAYGROUND & IDE */}
         {activeTab === 'playground' && (
-          <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[680px]">
+          <div className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:px-8">
+            {/* Mobile View Switcher for Playground */}
+            <div className="lg:hidden flex items-center bg-slate-200/80 dark:bg-slate-900 p-1 rounded-xl mb-3 border border-slate-300 dark:border-slate-800 shadow-xs">
+              <button
+                onClick={() => setPlaygroundMobileTab('editor')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                  playgroundMobileTab === 'editor'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Editor</span>
+              </button>
+              <button
+                onClick={() => setPlaygroundMobileTab('console')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition cursor-pointer relative ${
+                  playgroundMobileTab === 'console'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>Console</span>
+                {isRunning && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                )}
+                {isWaitingInput && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                )}
+                {errorMessage && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                )}
+              </button>
+              <button
+                onClick={() => setPlaygroundMobileTab('memory')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                  playgroundMobileTab === 'memory'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Database className="w-3.5 h-3.5" />
+                <span>Memória</span>
+                {Object.keys(memory).length > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-bold">
+                    {Object.keys(memory).length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Playground Grid: Full Side-by-Side on Desktop, Tabbed on Mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-[500px] lg:min-h-[680px]">
               {/* Left Column: Code Editor */}
-              <div className="lg:col-span-7 h-full min-h-[500px]">
+              <div className={`lg:col-span-7 h-full min-h-[480px] ${playgroundMobileTab !== 'editor' ? 'hidden lg:block' : 'block'}`}>
                 <CodeEditor
                   code={code}
                   onChange={handleCodeChange}
@@ -299,9 +356,9 @@ export function App() {
               </div>
 
               {/* Right Column: Console & Memory Table */}
-              <div className="lg:col-span-5 flex flex-col gap-5 h-full min-h-[500px]">
+              <div className={`lg:col-span-5 flex flex-col gap-5 h-full ${playgroundMobileTab === 'editor' ? 'hidden lg:flex' : 'flex'}`}>
                 {/* Console Output */}
-                <div className="flex-1 min-h-[300px]">
+                <div className={`flex-1 min-h-[360px] ${playgroundMobileTab === 'memory' ? 'hidden lg:block' : 'block'}`}>
                   <TerminalConsole
                     logs={logs}
                     isWaitingInput={isWaitingInput}
@@ -313,7 +370,7 @@ export function App() {
                 </div>
 
                 {/* VisualG Variable Watcher (Área das Variáveis) */}
-                <div className="h-64 flex-shrink-0">
+                <div className={`h-72 lg:h-64 flex-shrink-0 ${playgroundMobileTab === 'console' ? 'hidden lg:block' : 'block'}`}>
                   <MemoryTable memory={memory} />
                 </div>
               </div>

@@ -133,8 +133,8 @@ fimalgoritmo`);
           </button>
 
           {/* Examples Dropdown */}
-          <div className="relative flex items-center">
-            <FolderOpen className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute left-2.5 pointer-events-none" />
+          <div className="relative flex items-center max-w-[135px] sm:max-w-none">
+            <FolderOpen className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute left-2 pointer-events-none" />
             <select
               onChange={(e) => {
                 if (e.target.value) handleSelectExample(e.target.value);
@@ -142,10 +142,10 @@ fimalgoritmo`);
               }}
               defaultValue=""
               disabled={isRunning}
-              className="pl-8 pr-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/60 rounded-lg outline-none cursor-pointer disabled:opacity-50 transition"
+              className="pl-7 pr-2 py-1.5 text-xs bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/60 rounded-lg outline-none cursor-pointer disabled:opacity-50 transition truncate w-full"
             >
               <option value="" disabled>
-                Carregar Exemplo...
+                Exemplos...
               </option>
               {EXAMPLES.map((ex) => (
                 <option key={ex.id} value={ex.id}>
@@ -161,56 +161,57 @@ fimalgoritmo`);
               <button
                 onClick={() => onOpenSavedModal('save')}
                 disabled={isRunning}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-blue-700 dark:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-blue-700 dark:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg text-xs font-semibold transition cursor-pointer disabled:opacity-50"
                 title="Salvar algoritmo atual no Banco de Dados"
               >
                 <Save className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Salvar no Banco</span>
+                <span className="hidden sm:inline">Salvar</span>
               </button>
               <button
                 onClick={() => onOpenSavedModal('list')}
                 disabled={isRunning}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs font-medium transition cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs font-medium transition cursor-pointer disabled:opacity-50"
                 title="Abrir gerenciador de algoritmos salvos no banco"
               >
                 <Database className="w-3.5 h-3.5 text-blue-500" />
-                <span className="hidden md:inline">Meus Códigos</span>
+                <span className="hidden sm:inline">Salvos</span>
               </button>
             </div>
           )}
         </div>
 
         {/* Right side utility buttons */}
-        <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-          {/* Zoom controls */}
-          <button
-            onClick={() => setFontSize((prev) => Math.max(12, prev - 1))}
-            className="p-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
-            title="Diminuir fonte"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-[11px] font-mono w-6 text-center text-slate-500 dark:text-slate-400">{fontSize}px</span>
-          <button
-            onClick={() => setFontSize((prev) => Math.min(22, prev + 1))}
-            className="p-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
-            title="Aumentar fonte"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+        <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+          {/* Zoom controls (hidden on mobile) */}
+          <div className="hidden sm:flex items-center gap-1">
+            <button
+              onClick={() => setFontSize((prev) => Math.max(12, prev - 1))}
+              className="p-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              title="Diminuir fonte"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[11px] font-mono w-6 text-center text-slate-500 dark:text-slate-400">{fontSize}px</span>
+            <button
+              onClick={() => setFontSize((prev) => Math.min(22, prev + 1))}
+              className="p-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              title="Aumentar fonte"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+          </div>
 
           {/* Copy Button */}
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2.5 py-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs transition cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs transition cursor-pointer"
             title="Copiar código para área de transferência"
           >
             {copied ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold">Copiado!</span>
+                <span className="text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold hidden xs:inline">Copiado!</span>
               </>
             ) : (
               <>
@@ -223,11 +224,11 @@ fimalgoritmo`);
           {/* Download .alg file */}
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1 px-2.5 py-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs transition cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1.5 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-xs transition cursor-pointer"
             title="Baixar arquivo .alg para VisualG"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Salvar (.alg)</span>
+            <span className="hidden md:inline">.alg</span>
           </button>
         </div>
       </div>

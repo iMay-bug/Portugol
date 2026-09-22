@@ -59,6 +59,7 @@ export const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [testMode, setTestMode] = useState<'sample' | 'attempt'>('sample');
   const [allPassed, setAllPassed] = useState<boolean>(isCompleted);
+  const [mobileTab, setMobileTab] = useState<'instructions' | 'code'>('instructions');
 
   // Sync when exercise changes
   useEffect(() => {
@@ -89,6 +90,9 @@ export const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
     setIsTesting(true);
     setTestMode(mode);
     setTestResults(null);
+    if (window.innerWidth < 1024) {
+      setMobileTab('code');
+    }
 
     const testList = mode === 'sample'
       ? exercise.testCases.filter((tc) => !tc.isSecret)
@@ -210,9 +214,42 @@ export const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
         </div>
       </div>
 
+      {/* Mobile Subtab Switcher (Visible on mobile/tablet < 1024px) */}
+      <div className="lg:hidden flex items-center bg-slate-200/80 dark:bg-slate-900 p-1 rounded-xl mb-4 border border-slate-300 dark:border-slate-800 shadow-xs">
+        <button
+          onClick={() => setMobileTab('instructions')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition cursor-pointer ${
+            mobileTab === 'instructions'
+              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Lightbulb className="w-3.5 h-3.5" />
+          <span>Instruções & Dicas</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('code')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition cursor-pointer relative ${
+            mobileTab === 'code'
+              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <TerminalIcon className="w-3.5 h-3.5" />
+          <span>Solução & Testes</span>
+          {testResults && (
+            <span
+              className={`w-2 h-2 rounded-full ${
+                allPassed ? 'bg-emerald-500' : 'bg-rose-500'
+              }`}
+            />
+          )}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Kata Instructions & Solution Drawer */}
-        <div className="lg:col-span-5 space-y-4">
+        <div className={`lg:col-span-5 space-y-4 ${mobileTab !== 'instructions' ? 'hidden lg:block' : 'block'}`}>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm dark:shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -348,7 +385,7 @@ export const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
         </div>
 
         {/* Right Column: Code Editor & Codewars Test Runner */}
-        <div className="lg:col-span-7 flex flex-col space-y-4">
+        <div className={`lg:col-span-7 flex flex-col space-y-4 ${mobileTab !== 'code' ? 'hidden lg:flex' : 'flex'}`}>
           {/* Editor Box */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm dark:shadow-xl flex flex-col h-[420px]">
             <div className="bg-slate-50 dark:bg-slate-950 px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">

@@ -141,14 +141,14 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
       </div>
 
       {/* Mode Filters & Classification Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex items-center gap-2">
-          <Compass className="w-4 h-4 text-slate-400" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Classificação:</span>
-          <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1">
+          <Compass className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">Classificação:</span>
+          <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => { setViewMode('all'); setSelectedKyu('todos'); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 viewMode === 'all'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                   : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
@@ -158,18 +158,18 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             </button>
             <button
               onClick={() => setViewMode('beta')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'beta'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-800'
               }`}
             >
               <Sprout className="w-3.5 h-3.5" />
-              <span>Nível Beta Fácil ({betaExercises.length})</span>
+              <span>Nível Beta ({betaExercises.length})</span>
             </button>
             <button
               onClick={() => setViewMode('kata')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'kata'
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                   : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-800'

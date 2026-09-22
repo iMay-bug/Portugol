@@ -57,8 +57,38 @@ export const DocViewer: React.FC<DocViewerProps> = ({ onLoadExampleInPlayground 
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-      {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-80 flex-shrink-0">
+      {/* Mobile Chapter Carousel (Visible on mobile/tablet < 1024px) */}
+      <div className="lg:hidden w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xs">
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <span className="font-bold text-slate-700 dark:text-slate-300">
+            Módulos ({currentIndex + 1}/{DOCUMENTATION.length})
+          </span>
+          <span className="text-blue-600 dark:text-blue-400 font-semibold truncate max-w-[190px]">
+            {currentDoc.title}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {DOCUMENTATION.map((doc, idx) => {
+            const isSelected = doc.id === currentDoc.id;
+            return (
+              <button
+                key={doc.id}
+                onClick={() => setSelectedDocId(doc.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {idx + 1}. {doc.title}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop Sidebar Navigation (Hidden on Mobile) */}
+      <aside className="hidden lg:block w-80 flex-shrink-0">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sticky top-20 shadow-md dark:shadow-lg transition-colors duration-200">
           {/* Search Box */}
           <div className="relative mb-4">

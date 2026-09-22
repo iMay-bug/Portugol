@@ -112,11 +112,11 @@ export const TerminalConsole: React.FC<TerminalConsoleProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Digite o valor e tecle Enter..."
-              className="flex-1 bg-slate-900 border border-amber-500/50 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-amber-400 transition"
+              className="flex-1 bg-slate-900 border border-amber-500/50 rounded-lg px-3 py-2 sm:py-1.5 text-base sm:text-xs text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-amber-400 transition"
             />
             <button
               type="submit"
-              className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition cursor-pointer"
+              className="flex items-center gap-1 px-3.5 py-2 sm:py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition cursor-pointer min-h-[38px] sm:min-h-0"
             >
               <span>Enviar</span>
               <CornerDownLeft className="w-3.5 h-3.5" />
