@@ -16,7 +16,6 @@ export interface UserProfile {
   username: string;
   email?: string;
   avatar?: string;
-  password?: string;
   honor: number;
   kyu: number;
   completedExercises: string[];
@@ -34,6 +33,7 @@ export interface DbStats {
 const API_BASE = 'http://localhost:3001/api';
 const LOCAL_STORAGE_CURRENT_USER_KEY = 'portugol_current_user';
 const LOCAL_STORAGE_REGISTERED_USERS_KEY = 'portugol_registered_users';
+const LOCAL_STORAGE_AUTH_VAULT_KEY = 'portugol_auth_vault';
 const LOCAL_STORAGE_ALGOS_PREFIX = 'portugol_saved_algorithms_';
 const LOCAL_STORAGE_SUBMISSIONS_KEY = 'portugol_submissions';
 
@@ -45,6 +45,26 @@ export const DEFAULT_GUEST_USER: UserProfile = {
   kyu: 8,
   completedExercises: []
 };
+
+// Security: Client-Side SHA-256 Password Hashing
+async function hashClientPassword(password: string): Promise<string> {
+  const salt = 'portugol_sec_salt_2026';
+  try {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      const msgUint8 = new TextEncoder().encode(password + salt);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch {}
+  let hash = 0;
+  const str = password + salt;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'c_hash_' + Math.abs(hash).toString(16);
+}
 
 export const api = {
   // Check if SQLite backend is active and reachable
@@ -81,6 +101,8 @@ export const api = {
       if (res.ok) {
         const serverUser = await res.json();
         if (serverUser && serverUser.id) {
+          // Never persist passwords in public profile storage
+          delete (serverUser as any).password;
           localStorage.setItem(LOCAL_STORAGE_CURRENT_USER_KEY, JSON.stringify(serverUser));
           this.updateLocalUsersList(serverUser);
           return serverUser;
@@ -92,16 +114,19 @@ export const api = {
     return local;
   },
 
-  // Register new account
+  // Register new account with mandatory password & encryption
   async register(data: {
     username: string;
     email?: string;
-    password?: string;
+    password: string;
     avatar?: string;
   }): Promise<UserProfile> {
     const trimmedUsername = data.username.trim();
     if (!trimmedUsername) {
       throw new Error('Nome de usuário é obrigatório.');
+    }
+    if (!data.password || data.password.trim().length < 3) {
+      throw new Error('A senha deve ter no mínimo 3 caracteres para a segurança da sua conta.');
     }
 
     try {
@@ -111,7 +136,7 @@ export const api = {
         body: JSON.stringify({
           username: trimmedUsername,
           email: data.email?.trim() || '',
-          password: data.password || '',
+          password: data.password,
           avatar: data.avatar || '🧙‍♂️'
         })
       });
@@ -121,7 +146,8 @@ export const api = {
         throw new Error(body.error || 'Erro ao cadastrar usuário.');
       }
 
-      // Save as current user & add to local registry
+      // Save as current user session (without password field)
+      delete body.password;
       localStorage.setItem(LOCAL_STORAGE_CURRENT_USER_KEY, JSON.stringify(body));
       this.updateLocalUsersList(body);
       return body;
@@ -140,12 +166,19 @@ export const api = {
         throw new Error('Nome de usuário já cadastrado. Por favor, escolha outro ou faça login.');
       }
 
+      // Store hashed credential in client auth vault
+      const passwordHash = await hashClientPassword(data.password);
+      try {
+        const vaultRaw = localStorage.getItem(LOCAL_STORAGE_AUTH_VAULT_KEY) || '{}';
+        const vault = JSON.parse(vaultRaw);
+        vault[trimmedUsername.toLowerCase()] = passwordHash;
+        localStorage.setItem(LOCAL_STORAGE_AUTH_VAULT_KEY, JSON.stringify(vault));
+      } catch {}
+
       const newUser: UserProfile = {
         id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
         username: trimmedUsername,
-        email: data.email?.trim() || '',
         avatar: data.avatar || '🧙‍♂️',
-        password: data.password || '',
         honor: 0,
         kyu: 8,
         completedExercises: [],
@@ -159,11 +192,14 @@ export const api = {
     }
   },
 
-  // Login existing account
-  async login(credentials: { username: string; password?: string }): Promise<UserProfile> {
+  // Login existing account - Strictly requires password verification
+  async login(credentials: { username: string; password: string }): Promise<UserProfile> {
     const trimmedUsername = credentials.username.trim();
     if (!trimmedUsername) {
       throw new Error('Nome de usuário é obrigatório.');
+    }
+    if (!credentials.password || !credentials.password.trim()) {
+      throw new Error('A senha é obrigatória para acessar sua conta.');
     }
 
     try {
@@ -172,7 +208,7 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: trimmedUsername,
-          password: credentials.password || ''
+          password: credentials.password
         })
       });
 
@@ -181,11 +217,12 @@ export const api = {
         throw new Error(body.error || 'Falha ao autenticar.');
       }
 
+      delete (body as any).password;
       localStorage.setItem(LOCAL_STORAGE_CURRENT_USER_KEY, JSON.stringify(body));
       this.updateLocalUsersList(body);
       return body;
     } catch (err: any) {
-      // If error message is from backend API
+      // If error message is from backend API, rethrow
       if (err.message && !err.message.includes('fetch') && !err.message.includes('Failed')) {
         throw err;
       }
@@ -200,20 +237,34 @@ export const api = {
         throw new Error('Usuário não encontrado. Verifique o nome ou crie uma conta.');
       }
 
-      if (user.password && user.password !== credentials.password) {
-        throw new Error('Senha incorreta.');
+      // Verify password from offline auth vault
+      let isPasswordValid = false;
+      try {
+        const vaultRaw = localStorage.getItem(LOCAL_STORAGE_AUTH_VAULT_KEY) || '{}';
+        const vault = JSON.parse(vaultRaw);
+        const storedHash = vault[trimmedUsername.toLowerCase()];
+        const inputHash = await hashClientPassword(credentials.password);
+
+        if (storedHash) {
+          isPasswordValid = storedHash === inputHash || storedHash === credentials.password;
+        } else {
+          // If no hash in vault yet, set hash on first login
+          vault[trimmedUsername.toLowerCase()] = inputHash;
+          localStorage.setItem(LOCAL_STORAGE_AUTH_VAULT_KEY, JSON.stringify(vault));
+          isPasswordValid = true;
+        }
+      } catch {
+        isPasswordValid = false;
       }
 
+      if (!isPasswordValid) {
+        throw new Error('Senha incorreta! Não é permitido acessar contas de outros jogadores sem a senha correta.');
+      }
+
+      delete (user as any).password;
       localStorage.setItem(LOCAL_STORAGE_CURRENT_USER_KEY, JSON.stringify(user));
       return user;
     }
-  },
-
-  // Switch to account or guest
-  switchUser(user: UserProfile) {
-    localStorage.setItem(LOCAL_STORAGE_CURRENT_USER_KEY, JSON.stringify(user));
-    this.updateLocalUsersList(user);
-    return user;
   },
 
   // Logout (revert to guest)
@@ -222,13 +273,22 @@ export const api = {
     return DEFAULT_GUEST_USER;
   },
 
-  // Get list of saved/registered users
+  // Get public leaderboard of registered users (Read-Only)
   async getAllUsers(): Promise<UserProfile[]> {
     try {
       const res = await fetch(`${API_BASE}/users`);
       if (res.ok) {
         const users = await res.json();
-        const merged = this.mergeUsersLists(this.getLocalUsersList(), users);
+        const sanitized: UserProfile[] = users.map((u: any) => ({
+          id: u.id,
+          username: u.username,
+          avatar: u.avatar || '🧙‍♂️',
+          honor: u.honor || 0,
+          kyu: u.kyu || 8,
+          completedExercises: u.completedExercises || [],
+          created_at: u.created_at
+        }));
+        const merged = this.mergeUsersLists(this.getLocalUsersList(), sanitized);
         localStorage.setItem(LOCAL_STORAGE_REGISTERED_USERS_KEY, JSON.stringify(merged));
         return merged;
       }

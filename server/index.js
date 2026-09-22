@@ -30,10 +30,13 @@ app.post('/api/auth/register', (req, res) => {
     if (!username || !username.trim()) {
       return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
     }
+    if (!password || password.trim().length < 3) {
+      return res.status(400).json({ error: 'A senha deve conter no mínimo 3 caracteres para a segurança da sua conta.' });
+    }
     const user = dbService.registerUser({
       username: username.trim(),
       email: email || '',
-      password: password || '',
+      password: password,
       avatar: avatar || '🧙‍♂️'
     });
     res.status(201).json(user);
@@ -48,9 +51,12 @@ app.post('/api/auth/login', (req, res) => {
     if (!username || !username.trim()) {
       return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
     }
+    if (!password || !password.trim()) {
+      return res.status(400).json({ error: 'Informe a senha da sua conta para acessar.' });
+    }
     const user = dbService.loginUser({
       username: username.trim(),
-      password: password || ''
+      password: password
     });
     res.json(user);
   } catch (error) {

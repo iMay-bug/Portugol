@@ -2,9 +2,17 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Security: Password Hashing Helper
+const PASSWORD_SALT = 'portugol_salt_sec_2026';
+export function hashPassword(plainPassword) {
+  if (!plainPassword) return '';
+  return crypto.createHash('sha256').update(plainPassword + PASSWORD_SALT).digest('hex');
+}
 
 // Ensure data directory exists
 const dbDir = path.join(__dirname, 'data');
@@ -88,7 +96,11 @@ if (!defaultUser) {
 export const dbService = {
   // User operations
   getUser(userId = defaultUserId) {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    // Security: Do NOT select password from users
+    const user = db.prepare(`
+      SELECT id, username, email, avatar, honor, kyu, created_at 
+      FROM users WHERE id = ?
+    `).get(userId);
     if (!user) return null;
 
     const progress = db.prepare('SELECT exercise_id, completed_at FROM user_progress WHERE user_id = ?').all(userId);
@@ -99,36 +111,83 @@ export const dbService = {
     };
   },
 
+  // Internal: Get credentials for authentication only
+  _getUserCredentials(username) {
+    return db.prepare('SELECT id, username, password FROM users WHERE LOWER(username) = LOWER(?)').get(username);
+  },
+
   getUserByUsername(username) {
-    return db.prepare('SELECT * FROM users WHERE LOWER(username) = LOWER(?)').get(username);
+    // Safe lookup without password
+    return db.prepare(`
+      SELECT id, username, avatar, honor, kyu, created_at 
+      FROM users WHERE LOWER(username) = LOWER(?)
+    `).get(username);
   },
 
   registerUser({ username, email = '', password = '', avatar = '🧙‍♂️' }) {
-    const existing = this.getUserByUsername(username);
+    const trimmedUsername = username ? username.trim() : '';
+    if (!trimmedUsername) {
+      throw new Error('Nome de usuário é obrigatório.');
+    }
+    if (!password || password.trim().length < 3) {
+      throw new Error('A senha deve ter no mínimo 3 caracteres para proteger sua conta.');
+    }
+
+    const existing = db.prepare('SELECT id FROM users WHERE LOWER(username) = LOWER(?)').get(trimmedUsername);
     if (existing) {
       throw new Error('Nome de usuário já cadastrado. Escolha outro nome.');
     }
+
     const id = 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    const hashedPassword = hashPassword(password);
+
     db.prepare(`
       INSERT INTO users (id, username, email, password, avatar, honor, kyu)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(id, username, email, password, avatar, 0, 8);
+    `).run(id, trimmedUsername, email ? email.trim() : '', hashedPassword, avatar, 0, 8);
+
     return this.getUser(id);
   },
 
   loginUser({ username, password = '' }) {
-    const user = this.getUserByUsername(username);
-    if (!user) {
-      throw new Error('Usuário não encontrado.');
+    const trimmedUsername = username ? username.trim() : '';
+    if (!trimmedUsername) {
+      throw new Error('Informe o nome de usuário.');
     }
-    if (user.password && user.password !== password) {
-      throw new Error('Senha incorreta.');
+    if (!password || !password.trim()) {
+      throw new Error('Informe a senha da conta.');
     }
-    return this.getUser(user.id);
+
+    const creds = this._getUserCredentials(trimmedUsername);
+    if (!creds) {
+      throw new Error('Usuário não encontrado. Verifique o nome ou cadastre-se.');
+    }
+
+    const hashedInput = hashPassword(password);
+    // Allow matching hashed or legacy plaintext password
+    const isMatch = creds.password === hashedInput || creds.password === password;
+    if (!isMatch) {
+      throw new Error('Senha incorreta! Não é permitido acessar contas de outros jogadores sem autorização.');
+    }
+
+    // If password was stored as legacy plaintext, automatically upgrade to hashed
+    if (creds.password === password && creds.password !== hashedInput) {
+      try {
+        db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedInput, creds.id);
+      } catch {}
+    }
+
+    return this.getUser(creds.id);
   },
 
+  // Public Dojo Leaderboard (Read-Only) - Never exposes passwords or emails
   getAllUsers() {
-    return db.prepare('SELECT id, username, email, avatar, honor, kyu, created_at FROM users ORDER BY honor DESC').all();
+    return db.prepare(`
+      SELECT id, username, avatar, honor, kyu, created_at 
+      FROM users 
+      WHERE id != 'default_user'
+      ORDER BY honor DESC, kyu ASC, created_at ASC
+    `).all();
   },
 
   updateUser(userId = defaultUserId, { username, avatar }) {

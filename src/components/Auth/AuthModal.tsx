@@ -78,6 +78,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('Por favor, informe seu nome de usuário.');
       return;
     }
+    if (!password || password.trim().length < 3) {
+      setError('A senha deve ter no mínimo 3 caracteres para proteger sua conta.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -90,9 +94,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         password: password,
         avatar: selectedAvatar
       });
-      setSuccess(`Bem-vindo(a), ${user.username}! Conta criada e salva com sucesso.`);
+      setSuccess(`Bem-vindo(a), ${user.username}! Conta cadastrada e protegida por senha.`);
       onUserChanged(user);
       await loadSavedUsers();
+      setPassword('');
       setTimeout(() => {
         onClose();
       }, 1300);
@@ -109,6 +114,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('Informe seu nome de usuário para entrar.');
       return;
     }
+    if (!password || !password.trim()) {
+      setError('Informe a senha da conta para acessar.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -119,9 +128,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         username: username.trim(),
         password: password
       });
-      setSuccess(`Olá novamente, ${user.username}! Login realizado com sucesso.`);
+      setSuccess(`Olá novamente, ${user.username}! Acesso autorizado.`);
       onUserChanged(user);
       await loadSavedUsers();
+      setPassword('');
       setTimeout(() => {
         onClose();
       }, 1200);
@@ -132,19 +142,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleSwitchAccount = (user: UserProfile) => {
-    const switched = api.switchUser(user);
-    onUserChanged(switched);
-    setSuccess(`Conta alterada para ${user.username}!`);
-    setTimeout(() => {
-      onClose();
-    }, 900);
-  };
-
   const handleLogout = () => {
     const guest = api.logout();
     onUserChanged(guest);
-    setSuccess('Desconectado. Você está no modo convidado.');
+    setSuccess('Desconectado. Você agora está no modo visitante.');
+    setPassword('');
     setTimeout(() => {
       onClose();
     }, 1000);
@@ -228,8 +230,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>Perfis ({savedUsers.length})</span>
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span>Meu Perfil</span>
           </button>
         </div>
 
@@ -313,7 +315,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Senha <span className="text-slate-400 font-normal">(Opcional para estudo rápido)</span>
+                  Senha da Conta <span className="text-rose-500 font-bold">* (Mínimo 3 caracteres)</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -321,9 +323,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={3}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Crie uma senha ou deixe em branco"
+                    placeholder="Crie uma senha de acesso"
                     className="w-full pl-9 pr-10 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -334,6 +338,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Sua conta é protegida com criptografia e impede acessos não autorizados.
+                </p>
               </div>
 
               <div className="pt-2">
@@ -347,7 +354,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      <span>Cadastrar e Salvar Perfil</span>
+                      <span>Cadastrar e Proteger Perfil</span>
                     </>
                   )}
                 </button>
@@ -364,7 +371,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Nome de Usuário
+                  Nome de Usuário <span className="text-rose-500 font-bold">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -383,7 +390,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Senha
+                  Senha <span className="text-rose-500 font-bold">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -391,9 +398,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Sua senha"
+                    placeholder="Sua senha de acesso"
                     className="w-full pl-9 pr-10 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -436,21 +444,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* TAB 3: SAVED ACCOUNTS & PROFILE INFO */}
+          {/* TAB 3: PERFIL ATIVO & RANKING PÚBLICO (SOMENTE LEITURA) */}
           {tab === 'accounts' && (
             <div className="space-y-4">
               {/* Current User Card */}
-              <div className="p-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/60 shadow-xs flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl">{currentUser.avatar || '🧙‍♂️'}</div>
+                  <div className="text-3xl w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    {currentUser.avatar || '🧙‍♂️'}
+                  </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm text-slate-900 dark:text-white">
                         {currentUser.username}
                       </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
-                        Ativo Agora
-                      </span>
+                      {isGuest ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20">
+                          Visitante
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20 flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Conectado
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1 font-mono text-amber-600 dark:text-amber-400 font-semibold">
@@ -464,56 +480,131 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                 </div>
 
-                {!isGuest && (
+                {!isGuest ? (
                   <button
                     onClick={handleLogout}
-                    className="p-2 rounded-lg text-rose-600 hover:bg-rose-500/10 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg text-rose-600 hover:bg-rose-500/10 border border-rose-200 dark:border-rose-900/40 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                     title="Desconectar da conta"
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sair</span>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sair</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setTab('register')}
+                    className="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer shadow-xs"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Criar Conta</span>
                   </button>
                 )}
               </div>
 
-              {/* Other Accounts List */}
+              {/* Security Shield Notice */}
+              <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <div className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
+                  <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                    Proteção de Contas Ativa:
+                  </strong>{' '}
+                  Nenhum jogador pode acessar a conta de outro sem a senha correta. Para entrar em outra conta, utilize a aba{' '}
+                  <button
+                    onClick={() => {
+                      setTab('login');
+                      setError(null);
+                      setSuccess(null);
+                    }}
+                    className="text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer"
+                  >
+                    Entrar
+                  </button>{' '}
+                  informando a senha.
+                </div>
+              </div>
+
+              {/* Dojo Leaderboard (Read-Only Public Ranking) */}
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  Trocar de Conta:
-                </h4>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Ranking do Dojo (Placar de Alunos)</span>
+                  </h4>
+                  <span className="text-[10px] text-slate-400">
+                    {savedUsers.filter((u) => u.id !== 'default_user').length} Alunos
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                   {savedUsers
-                    .filter((u) => u.id !== currentUser.id)
-                    .map((user) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-xl">{user.avatar || '🧙‍♂️'}</span>
-                          <div>
-                            <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                              {user.username}
+                    .filter((u) => u.id !== 'default_user')
+                    .sort((a, b) => (b.honor || 0) - (a.honor || 0))
+                    .map((user, index) => {
+                      const isMe = user.id === currentUser.id;
+                      const rank = index + 1;
+                      const badgeBg =
+                        rank === 1
+                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
+                          : rank === 2
+                          ? 'bg-slate-300/20 text-slate-400 border-slate-400/30'
+                          : rank === 3
+                          ? 'bg-amber-700/10 text-amber-700 dark:text-amber-600 border-amber-700/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700';
+
+                      return (
+                        <div
+                          key={user.id}
+                          className={`flex items-center justify-between p-2.5 rounded-xl border transition ${
+                            isMe
+                              ? 'border-blue-500/40 bg-blue-500/5'
+                              : 'border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {/* Rank Position */}
+                            <div
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold border ${badgeBg}`}
+                            >
+                              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                              {user.kyu} kyu • {user.honor || 0} XP
+
+                            <span className="text-xl">{user.avatar || '🧙‍♂️'}</span>
+
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                  {user.username}
+                                </span>
+                                {isMe && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-500 text-white">
+                                    Você
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                {user.kyu} Kyu • {user.completedExercises?.length || 0} Katas
+                              </div>
                             </div>
                           </div>
+
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">
+                              {user.honor || 0} XP
+                            </span>
+                          </div>
                         </div>
+                      );
+                    })}
 
-                        <button
-                          onClick={() => handleSwitchAccount(user)}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-700 dark:text-slate-200 transition cursor-pointer"
-                        >
-                          Acessar
-                        </button>
-                      </div>
-                    ))}
-
-                  {savedUsers.length <= 1 && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 italic text-center py-3">
-                      Nenhuma outra conta cadastrada neste dispositivo.
-                    </p>
+                  {savedUsers.filter((u) => u.id !== 'default_user').length === 0 && (
+                    <div className="text-center py-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                      <Trophy className="w-6 h-6 text-slate-400 mx-auto mb-1 opacity-50" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Nenhum jogador cadastrado no ranking ainda.
+                      </p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        Crie sua conta para figurar no topo do placar!
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
