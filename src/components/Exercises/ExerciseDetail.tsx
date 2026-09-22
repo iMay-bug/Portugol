@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { HighlightedCodeEditor } from '../Editor/HighlightedCodeEditor';
 import { VisualGCodeView } from '../Editor/VisualGCodeView';
+import { ExerciseInstructionView } from './ExerciseInstructionView';
 import { api } from '../../services/api';
 
 interface ExerciseDetailProps {
@@ -279,38 +280,47 @@ export const ExerciseDetail: React.FC<ExerciseDetailProps> = ({
               ))}
             </div>
 
-            <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed space-y-3">
-              {exercise.description.split('\n\n').map((para, idx) => {
-                if (para.startsWith('### ')) {
-                  return (
-                    <h4 key={idx} className="text-sm font-bold text-slate-900 dark:text-white mt-4 mb-1">
-                      {para.replace('### ', '')}
-                    </h4>
-                  );
-                }
-                if (para.startsWith('```')) {
-                  const content = para.replace(/```[a-z]*\n?/g, '').trim();
-                  return (
-                    <pre
-                      key={idx}
-                      className="bg-slate-950 p-2.5 rounded-lg text-cyan-300 text-xs font-mono overflow-x-auto border border-slate-800"
-                    >
-                      {content}
-                    </pre>
-                  );
-                }
-                return (
-                  <p
-                    key={idx}
-                    dangerouslySetInnerHTML={{
-                      __html: para
-                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>')
-                        .replace(/`(.*?)`/g, '<code class="bg-slate-100 dark:bg-slate-950 px-1 py-0.5 rounded text-blue-600 dark:text-cyan-300 font-mono text-xs border border-slate-200 dark:border-slate-800">$1</code>')
-                    }}
-                  />
-                );
-              })}
-            </div>
+            {/* Rich Markdown & Card Instructions */}
+            <ExerciseInstructionView description={exercise.description} />
+
+            {/* Quick I/O Visual Example Card */}
+            {exercise.testCases && exercise.testCases.length > 0 && (
+              <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 mb-2">
+                  <TerminalIcon className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                  <span>Resumo do que o programa deve fazer:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {exercise.testCases[0].input.length > 0 ? (
+                    <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        ⌨️ Entrada (Você digita)
+                      </span>
+                      <code className="text-blue-600 dark:text-cyan-300 font-mono font-bold text-xs">
+                        {exercise.testCases[0].input.join(', ')}
+                      </code>
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        ⌨️ Entrada
+                      </span>
+                      <span className="text-slate-500 italic text-xs">
+                        Nenhuma entrada necessária
+                      </span>
+                    </div>
+                  )}
+                  <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                      🖥️ Resposta na Tela (Saída)
+                    </span>
+                    <code className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs">
+                      {exercise.testCases[0].expectedOutputContains.join(' ')}
+                    </code>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Hints Section */}

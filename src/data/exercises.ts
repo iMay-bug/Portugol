@@ -42,26 +42,28 @@ export const EXERCISES: Exercise[] = [
     classification: 'Nível Beta • Passo 1',
     description: `
 ### 🌟 Seja muito bem-vindo ao Nível Beta!
-Este é o nível mais fácil e amigável possível, feito especialmente para quem está começando do **absoluto zero**!
+Este é o nível mais fácil e amigável possível, feito para quem está aprendendo a programar do **absoluto zero**!
 
-### O que você vai aprender?
-O comando **\`escreval\`** é a forma como o computador "conversa" com a gente, mostrando frases na tela.
+### 💡 O que é o comando \`escreval\`?
+O comando \`escreval\` é a forma como o computador "conversa" com você, mostrando frases na tela. Tudo o que for texto deve ficar entre aspas duplas: \`"Olá!"\`.
 
-### Sua Missão
-Faça o computador exibir exatamente a mensagem:
+### 🎯 Sua Missão
+Faça o computador exibir na tela exatamente a mensagem:
 \`\`\`text
 Olá, Mundo!
 \`\`\`
 
-### Como Resolver
-No código ao lado, dentro do bloco **\`inicio\`**, digite:
-\`escreval("Olá, Mundo!")\`
+### 📋 Exemplo
+- O computador deve simplesmente escrever: \`Olá, Mundo!\`
+
+> ⚠️ **Como resolver:** Dentro do bloco \`inicio\`, digite: \`escreval("Olá, Mundo!")\`
     `,
     starterCode: `algoritmo "Beta01_OlaMundo"
 var
    // Nenhuma variável necessária neste primeiro passo!
 inicio
-   // Digite exatamente na linha abaixo: escreval("Olá, Mundo!")
+   // Digite na linha abaixo o comando: escreval("Olá, Mundo!")
+   escreval("Olá, Mundo!")
 
 fimalgoritmo`,
     hints: [
@@ -94,32 +96,37 @@ fimalgoritmo`,
     category: 'Comece Aqui',
     classification: 'Nível Beta • Passo 2',
     description: `
-### 🌟 Aprendendo a Ouvir o Usuário
-No passo anterior você exibiu uma mensagem. Agora, o computador vai **ler** uma informação digitada por você!
+### 🌟 O Computador vai Ouvir Você!
+No exercício anterior o computador apenas exibiu uma mensagem fixa. Agora ele vai **aprender a ouvir** o que você digita!
 
-### O que é o comando \`leia\`?
-O comando \`leia(nome)\` pausa o programa e guarda na memória o que for digitado no teclado.
+### 💡 O que faz o comando \`leia\`?
+- O comando \`leia(nome)\` pausa o programa e espera a pessoa digitar algo no teclado.
+- O que for digitado fica guardado na variável \`nome\`.
+- Para responder, usamos \`escreval("Olá, ", nome)\`. Repare na vírgula separando o texto da variável!
 
-### Sua Missão
-1. Leia o nome da pessoa com \`leia(nome)\`.
-2. Exiba a saudação:
+### 🎯 Sua Missão
+1. O comando \`leia(nome)\` já está pronto no código para ler o nome digitado.
+2. Na linha abaixo dele, use o \`escreval\` para responder no formato:
 \`\`\`text
 Olá, <nome>
 \`\`\`
 
-### Exemplo
-- Se você digitar: \`Maria\`
-- O computador deve responder: \`Olá, Maria\`
+### 📋 Exemplo Prático
+- Se você digitar: \`Maria\` ➔ O computador responde: \`Olá, Maria\`
+- Se você digitar: \`Carlos\` ➔ O computador responde: \`Olá, Carlos\`
+
+> ⚠️ **Dica de Ouro:** Digite \`escreval("Olá, ", nome)\` para juntar a saudação com o nome lido.
     `,
     starterCode: `algoritmo "Beta02_LendoNome"
 var
    nome: caractere
 inicio
-   // 1. Leia o nome digitado:
+   // 1. O computador lê o nome digitado pelo usuário:
    leia(nome)
 
-   // 2. Exiba a mensagem de boas-vindas:
-   // escreval("Olá, ", nome)
+   // 2. Agora é sua vez! Escreva na linha abaixo a mensagem de saudação:
+   // Dica: escreval("Olá, ", nome)
+   
 
 fimalgoritmo`,
     hints: [
@@ -159,15 +166,22 @@ fimalgoritmo`,
     classification: 'Nível Beta • Passo 3',
     description: `
 ### 🌟 O Computador como Calculadora
-Computadores são super velozes fazendo contas matemáticas! Vamos somar dois números simples.
+Computadores são máquinas incríveis para fazer cálculos! Vamos somar dois números simples.
 
-### Sua Missão
-1. O programa vai ler dois números inteiros: \`a\` e \`b\`.
-2. Calcule a soma: \`resultado <- a + b\`.
-3. Exiba o resultado final com \`escreval(resultado)\`.
+### 💡 Como funciona a soma?
+No Portugol, usamos o sinal de mais (\`+\`) para somar e a setinha (\`<-\`) para guardar o valor calculado:
+\`resultado <- a + b\`
 
-### Exemplo
-- Se a entrada for \`5\` e \`3\`, o programa deve exibir \`8\`.
+### 🎯 Sua Missão
+1. O programa já lê os dois números inteiros: \`a\` e \`b\`.
+2. A soma já é calculada: \`resultado <- a + b\`.
+3. Sua missão é apenas **exibir o resultado** usando \`escreval(resultado)\`.
+
+### 📋 Exemplo Prático
+- Se você digitar \`5\` e \`3\` ➔ O programa responde: \`8\`
+- Se você digitar \`10\` e \`20\` ➔ O programa responde: \`30\`
+
+> ⚠️ **Dica:** Adicione a linha \`escreval(resultado)\` logo após o cálculo.
     `,
     starterCode: `algoritmo "Beta03_SomaFacil"
 var
@@ -176,10 +190,11 @@ inicio
    leia(a)
    leia(b)
 
-   // Calcule a soma abaixo:
+   // A soma dos dois números já está calculada aqui:
    resultado <- a + b
 
-   // Agora exiba o resultado:
+   // Agora adicione o comando escreval para mostrar o resultado na tela:
+   
 
 fimalgoritmo`,
     hints: [
@@ -221,18 +236,20 @@ fimalgoritmo`,
     classification: 'Nível Beta • Passo 4',
     description: `
 ### 🌟 Multiplicando com o Asterisco (*)
-Na programação de computadores, a multiplicação é feita com o símbolo de asterisco (\`*\`).
-O dobro de qualquer número é ele vezes 2 (\`n * 2\`).
+Na programação, a multiplicação é feita usando o símbolo de asterisco (\`*\`).
+O dobro de qualquer número é o próprio número vezes 2 (\`n * 2\`).
 
-### Sua Missão
-Leia um número inteiro \`n\` e exiba:
+### 🎯 Sua Missão
+Leia um número inteiro \`n\`, calcule o dobro dele e exiba no formato:
 \`\`\`text
 Dobro: <valor>
 \`\`\`
 
-### Exemplo
-- Se a entrada for \`7\`, a saída deve ser \`Dobro: 14\`.
-- Se a entrada for \`20\`, a saída deve ser \`Dobro: 40\`.
+### 📋 Exemplo Prático
+- Se a entrada for \`7\` ➔ A saída deve ser \`Dobro: 14\`
+- Se a entrada for \`20\` ➔ A saída deve ser \`Dobro: 40\`
+
+> ⚠️ **Dica:** Use \`escreval("Dobro: ", dobro)\` com um espaço logo após os dois pontos.
     `,
     starterCode: `algoritmo "Beta04_Dobro"
 var
@@ -245,6 +262,7 @@ inicio
 
    // 2. Exiba o dobro no formato pedido:
    // escreval("Dobro: ", dobro)
+   
 
 fimalgoritmo`,
     hints: [
@@ -284,18 +302,20 @@ fimalgoritmo`,
     category: 'Comece Aqui',
     classification: 'Nível Beta • Passo 5',
     description: `
-### 🌟 Subtraindo com o Menos (-)
+### 🌟 Quem vem antes? (Subtração)
 O antecessor de qualquer número inteiro é o valor que vem imediatamente antes dele na reta numérica, ou seja, \`n - 1\`.
 
-### Sua Missão
+### 🎯 Sua Missão
 Leia um número inteiro \`n\` e exiba o seu antecessor no formato:
 \`\`\`text
 Antecessor: <valor>
 \`\`\`
 
-### Exemplo
-- Entrada: \`10\` &rarr; Saída: \`Antecessor: 9\`
-- Entrada: \`1\` &rarr; Saída: \`Antecessor: 0\`
+### 📋 Exemplo Prático
+- Se você digitar: \`10\` ➔ O programa responde: \`Antecessor: 9\`
+- Se você digitar: \`1\` ➔ O programa responde: \`Antecessor: 0\`
+
+> ⚠️ **Dica:** Basta usar \`escreval("Antecessor: ", antes)\`.
     `,
     starterCode: `algoritmo "Beta05_Antecessor"
 var
@@ -307,6 +327,7 @@ inicio
    antes <- n - 1
 
    // Exiba com escreval:
+   
 
 fimalgoritmo`,
     hints: [
@@ -345,22 +366,21 @@ fimalgoritmo`,
     category: 'Comece Aqui',
     classification: 'Nível Beta • Passo 6',
     description: `
-### 🌟 Divisão e Números Reais
-Quando tiramos notas escolares (como 7.5 ou 8.0), usamos variáveis do tipo **\`real\`** (que aceitam casas decimais).
+### 🌟 Calculando a Média Escolar
+Quando calculamos notas escolares (como 7.5 ou 8.0), usamos variáveis do tipo **\`real\`** (que aceitam números decimais com vírgula/ponto).
 Para achar a média de 2 notas: somamos as duas e dividimos por 2:
 \`media <- (nota1 + nota2) / 2\`
 
-> ⚠️ **Dica de Ouro:** Não esqueça dos parênteses em volta da soma! Se você fizer \`nota1 + nota2 / 2\`, o computador dividirá apenas a segunda nota.
-
-### Sua Missão
-Leia \`nota1\` e \`nota2\` e exiba:
+### 🎯 Sua Missão
+Leia duas notas (\`nota1\` e \`nota2\`), calcule a média e exiba no formato:
 \`\`\`text
 Média: <valor>
 \`\`\`
 
-### Exemplo
-- Entrada: \`8.0\` e \`6.0\`
-- Saída deve conter: \`7\`
+### 📋 Exemplo Prático
+- Se as notas forem \`8.0\` e \`6.0\` ➔ A média exibida deve ser \`7\`
+
+> ⚠️ **Dica de Ouro:** Não esqueça dos parênteses em volta da soma \`(nota1 + nota2)\` antes de dividir por 2!
     `,
     starterCode: `algoritmo "Beta06_Media"
 var
