@@ -63,14 +63,25 @@ db.exec(`
   );
 `);
 
+// Migration: ensure password, email, avatar columns exist
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN password TEXT;`);
+} catch (e) {}
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN email TEXT;`);
+} catch (e) {}
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT '🧙‍♂️';`);
+} catch (e) {}
+
 // Ensure a default user exists
 const defaultUserId = 'default_user';
 const defaultUser = db.prepare('SELECT id FROM users WHERE id = ?').get(defaultUserId);
 if (!defaultUser) {
   db.prepare(`
-    INSERT INTO users (id, username, honor, kyu)
-    VALUES (?, ?, ?, ?)
-  `).run(defaultUserId, 'Estudante Portugol', 0, 8);
+    INSERT INTO users (id, username, email, password, avatar, honor, kyu)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(defaultUserId, 'Estudante Portugol', '', '', '🧙‍♂️', 0, 8);
 }
 
 // Database Helper Methods
@@ -88,9 +99,44 @@ export const dbService = {
     };
   },
 
-  updateUser(userId = defaultUserId, { username }) {
+  getUserByUsername(username) {
+    return db.prepare('SELECT * FROM users WHERE LOWER(username) = LOWER(?)').get(username);
+  },
+
+  registerUser({ username, email = '', password = '', avatar = '🧙‍♂️' }) {
+    const existing = this.getUserByUsername(username);
+    if (existing) {
+      throw new Error('Nome de usuário já cadastrado. Escolha outro nome.');
+    }
+    const id = 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    db.prepare(`
+      INSERT INTO users (id, username, email, password, avatar, honor, kyu)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(id, username, email, password, avatar, 0, 8);
+    return this.getUser(id);
+  },
+
+  loginUser({ username, password = '' }) {
+    const user = this.getUserByUsername(username);
+    if (!user) {
+      throw new Error('Usuário não encontrado.');
+    }
+    if (user.password && user.password !== password) {
+      throw new Error('Senha incorreta.');
+    }
+    return this.getUser(user.id);
+  },
+
+  getAllUsers() {
+    return db.prepare('SELECT id, username, email, avatar, honor, kyu, created_at FROM users ORDER BY honor DESC').all();
+  },
+
+  updateUser(userId = defaultUserId, { username, avatar }) {
     if (username) {
       db.prepare('UPDATE users SET username = ? WHERE id = ?').run(username, userId);
+    }
+    if (avatar) {
+      db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, userId);
     }
     return this.getUser(userId);
   },

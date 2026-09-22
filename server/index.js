@@ -23,10 +23,55 @@ app.get('/api/health', (req, res) => {
   }
 });
 
+// Auth routes
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { username, email, password, avatar } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
+    }
+    const user = dbService.registerUser({
+      username: username.trim(),
+      email: email || '',
+      password: password || '',
+      avatar: avatar || '🧙‍♂️'
+    });
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ error: 'Nome de usuário é obrigatório.' });
+    }
+    const user = dbService.loginUser({
+      username: username.trim(),
+      password: password || ''
+    });
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/users', (req, res) => {
+  try {
+    const users = dbService.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // User routes
 app.get('/api/user', (req, res) => {
   try {
-    const user = dbService.getUser();
+    const userId = req.query.userId ? String(req.query.userId) : undefined;
+    const user = dbService.getUser(userId);
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -35,8 +80,8 @@ app.get('/api/user', (req, res) => {
 
 app.put('/api/user', (req, res) => {
   try {
-    const { username } = req.body;
-    const user = dbService.updateUser(undefined, { username });
+    const { username, avatar, userId } = req.body;
+    const user = dbService.updateUser(userId || undefined, { username, avatar });
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -46,7 +91,8 @@ app.put('/api/user', (req, res) => {
 // Algorithms CRUD routes
 app.get('/api/algorithms', (req, res) => {
   try {
-    const algorithms = dbService.getAlgorithms();
+    const userId = req.query.userId ? String(req.query.userId) : undefined;
+    const algorithms = dbService.getAlgorithms(userId);
     res.json(algorithms);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -67,13 +113,14 @@ app.get('/api/algorithms/:id', (req, res) => {
 
 app.post('/api/algorithms', (req, res) => {
   try {
-    const { id, title, description, code } = req.body;
+    const { id, title, description, code, userId } = req.body;
     if (!title || !code) {
       return res.status(400).json({ error: 'Título e código são obrigatórios.' });
     }
     const algId = id || 'alg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const saved = dbService.saveAlgorithm({
       id: algId,
+      userId: userId || undefined,
       title,
       description: description || '',
       code
@@ -117,11 +164,11 @@ app.delete('/api/algorithms/:id', (req, res) => {
 // Exercise progress & submissions
 app.post('/api/progress', (req, res) => {
   try {
-    const { exerciseId, honorReward } = req.body;
+    const { exerciseId, honorReward, userId } = req.body;
     if (!exerciseId) {
       return res.status(400).json({ error: 'exerciseId é obrigatório.' });
     }
-    const updatedUser = dbService.markExerciseCompleted(undefined, exerciseId, Number(honorReward) || 0);
+    const updatedUser = dbService.markExerciseCompleted(userId || undefined, exerciseId, Number(honorReward) || 0);
     res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -130,10 +177,11 @@ app.post('/api/progress', (req, res) => {
 
 app.post('/api/submissions', (req, res) => {
   try {
-    const { exerciseId, code, passed, passedTests, totalTests, durationMs } = req.body;
+    const { exerciseId, code, passed, passedTests, totalTests, durationMs, userId } = req.body;
     const subId = 'sub_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const submission = dbService.recordSubmission({
       id: subId,
+      userId: userId || undefined,
       exerciseId,
       code,
       passed,

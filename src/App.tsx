@@ -10,8 +10,9 @@ import { CheatSheet } from './components/CheatSheet/CheatSheet';
 import { VisualGRunner } from './engine/runner';
 import { VariableInfo } from './engine/types';
 import { EXERCISES, Exercise } from './data/exercises';
-import { api, DbStats, UserProfile } from './services/api';
+import { api, DbStats, UserProfile, DEFAULT_GUEST_USER } from './services/api';
 import { SavedAlgorithmsModal } from './components/Database/SavedAlgorithmsModal';
+import { AuthModal } from './components/Auth/AuthModal';
 import { Code2, Terminal, Database } from 'lucide-react';
 
 const DEFAULT_CODE = `algoritmo "CalculoMedia"
@@ -85,8 +86,9 @@ export function App() {
   // Database & Profile state
   const [isDbConnected, setIsDbConnected] = useState<boolean>(false);
   const [dbStats, setDbStats] = useState<DbStats | undefined>(undefined);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => api.getCurrentUserSync());
   const [isSavedModalOpen, setIsSavedModalOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [savedModalView, setSavedModalView] = useState<'list' | 'save'>('list');
   const [playgroundMobileTab, setPlaygroundMobileTab] = useState<'editor' | 'console' | 'memory'>('editor');
 
@@ -100,7 +102,7 @@ export function App() {
       if (health.stats) {
         setDbStats(health.stats);
       }
-      const user = await api.getUser();
+      const user = await api.getCurrentUser();
       if (!isMounted) return;
       setUserProfile(user);
       if (user && user.completedExercises && user.completedExercises.length > 0) {
@@ -119,6 +121,13 @@ export function App() {
       clearInterval(interval);
     };
   }, []);
+
+  const handleUserChanged = (user: UserProfile) => {
+    setUserProfile(user);
+    const exIds = user.completedExercises || [];
+    setCompletedExerciseIds(exIds);
+    localStorage.setItem('visualg_completed_exercises', JSON.stringify(exIds));
+  };
 
   // Synchronize HTML element class with current theme
   useEffect(() => {
@@ -234,8 +243,12 @@ export function App() {
       setCompletedExerciseIds(updated);
       localStorage.setItem('visualg_completed_exercises', JSON.stringify(updated));
     }
-    const user = await api.getUser();
-    setUserProfile(user);
+    const currentEx = EXERCISES.find((e) => e.id === id);
+    const reward = currentEx?.honor || 10;
+    const updatedUser = await api.recordProgress(id, reward, userProfile?.id);
+    if (updatedUser) {
+      setUserProfile(updatedUser);
+    }
   };
 
   const handleOpenSavedModal = (view: 'list' | 'save' = 'list') => {
@@ -282,6 +295,8 @@ export function App() {
         onOpenDatabase={() => handleOpenSavedModal('list')}
         userHonor={userProfile?.honor || 0}
         userKyu={userProfile?.kyu || 8}
+        currentUser={userProfile}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
       />
 
       {/* Main App Content Body - with pb-20 on mobile for bottom dock clearance */}
@@ -418,6 +433,15 @@ export function App() {
         onLoadAlgorithm={handleLoadSavedAlgorithm}
         isDbConnected={isDbConnected}
         dbStats={dbStats}
+        currentUser={userProfile}
+      />
+
+      {/* Account / Registration & Login Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={userProfile || DEFAULT_GUEST_USER}
+        onUserChanged={handleUserChanged}
       />
     </div>
   );

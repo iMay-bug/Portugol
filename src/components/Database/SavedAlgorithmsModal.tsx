@@ -14,7 +14,7 @@ import {
   HardDrive,
   RefreshCw
 } from 'lucide-react';
-import { api, SavedAlgorithm, DbStats } from '../../services/api';
+import { api, SavedAlgorithm, DbStats, UserProfile } from '../../services/api';
 
 interface SavedAlgorithmsModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ interface SavedAlgorithmsModalProps {
   onLoadAlgorithm: (code: string, title?: string) => void;
   isDbConnected: boolean;
   dbStats?: DbStats;
+  currentUser?: UserProfile | null;
 }
 
 export const SavedAlgorithmsModal: React.FC<SavedAlgorithmsModalProps> = ({
@@ -31,7 +32,8 @@ export const SavedAlgorithmsModal: React.FC<SavedAlgorithmsModalProps> = ({
   currentCode,
   onLoadAlgorithm,
   isDbConnected,
-  dbStats
+  dbStats,
+  currentUser
 }) => {
   const [activeView, setActiveView] = useState<'list' | 'save'>('list');
   const [algorithms, setAlgorithms] = useState<SavedAlgorithm[]>([]);
@@ -54,12 +56,12 @@ export const SavedAlgorithmsModal: React.FC<SavedAlgorithmsModalProps> = ({
       setDescription('');
       setSuccessMessage(null);
     }
-  }, [isOpen, currentCode]);
+  }, [isOpen, currentCode, currentUser?.id]);
 
   const loadAlgorithms = async () => {
     setIsLoading(true);
     try {
-      const list = await api.getAlgorithms();
+      const list = await api.getAlgorithms(currentUser?.id);
       setAlgorithms(list);
     } finally {
       setIsLoading(false);
@@ -75,9 +77,10 @@ export const SavedAlgorithmsModal: React.FC<SavedAlgorithmsModalProps> = ({
       await api.saveAlgorithm({
         title: title.trim(),
         description: description.trim(),
-        code: currentCode
+        code: currentCode,
+        userId: currentUser?.id
       });
-      setSuccessMessage('Algoritmo salvo no Banco de Dados SQLite com sucesso!');
+      setSuccessMessage('Algoritmo salvo com sucesso!');
       await loadAlgorithms();
       setTimeout(() => {
         setSuccessMessage(null);
@@ -91,15 +94,15 @@ export const SavedAlgorithmsModal: React.FC<SavedAlgorithmsModalProps> = ({
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Tem certeza que deseja excluir o algoritmo "${name}" do banco de dados?`)) {
-      await api.deleteAlgorithm(id);
+    if (confirm(`Tem certeza que deseja excluir o algoritmo "${name}"?`)) {
+      await api.deleteAlgorithm(id, currentUser?.id);
       await loadAlgorithms();
     }
   };
 
   const handleToggleFavorite = async (alg: SavedAlgorithm) => {
     const newFav = alg.is_favorite ? 0 : 1;
-    await api.updateAlgorithm(alg.id, { is_favorite: newFav });
+    await api.updateAlgorithm(alg.id, { is_favorite: newFav }, currentUser?.id);
     await loadAlgorithms();
   };
 

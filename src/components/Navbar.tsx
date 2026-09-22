@@ -1,5 +1,6 @@
 import React from 'react';
-import { BookOpen, Code2, Trophy, Zap, Terminal, Sun, Moon, Database, Sparkles } from 'lucide-react';
+import { BookOpen, Code2, Trophy, Zap, Terminal, Sun, Moon, Database, Sparkles, User, UserPlus } from 'lucide-react';
+import { UserProfile } from '../services/api';
 
 export type TabType = 'docs' | 'playground' | 'exercises' | 'cheatsheet';
 
@@ -14,6 +15,8 @@ interface NavbarProps {
   onOpenDatabase?: () => void;
   userHonor?: number;
   userKyu?: number;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,7 +29,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   isDbConnected = false,
   onOpenDatabase,
   userHonor = 0,
-  userKyu = 8
+  userKyu = 8,
+  currentUser,
+  onOpenAuth
 }) => {
   const tabs = [
     {
@@ -160,6 +165,38 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="hidden sm:inline">
                     {isDbConnected ? 'SQLite' : 'Local'}
                   </span>
+                </button>
+              )}
+
+              {/* User Account / Profile Button */}
+              {onOpenAuth && (
+                <button
+                  onClick={onOpenAuth}
+                  className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold border transition cursor-pointer shadow-sm shrink-0 ${
+                    currentUser && currentUser.id !== 'default_user'
+                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600 shadow-indigo-500/20'
+                  }`}
+                  title={
+                    currentUser && currentUser.id !== 'default_user'
+                      ? `Conta: ${currentUser.username} (Clique para gerenciar)`
+                      : 'Cadastrar ou Entrar na sua conta'
+                  }
+                >
+                  {currentUser && currentUser.id !== 'default_user' ? (
+                    <>
+                      <span className="text-sm leading-none">{currentUser.avatar || '🧙‍♂️'}</span>
+                      <span className="max-w-[80px] sm:max-w-[110px] truncate">
+                        {currentUser.username}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Cadastrar / Entrar</span>
+                      <span className="sm:hidden">Entrar</span>
+                    </>
+                  )}
                 </button>
               )}
 
